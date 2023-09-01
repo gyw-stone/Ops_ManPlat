@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>运维管理平台</title>
+    <link rel="stylesheet" href="{{ url_for('static',filename='plugins/bootstrap-3.4.1/css/bootstrap.min.css') }}">
+    <style>
+        .navbar{
+            border-radius: 0;
+        }
+    </style>
+    {% block css %}
+    {% endblock %}
+</head>
+<body style="background-image: url('/static/img/*');">
+
+<nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">运维管理平台</a>
+    </div>
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+          <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                 aria-expanded="false">功能管理<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="/gethost">数据展示</a></li>
+		<li><a href="/">随机密码</a></li>
+            </ul>
+          </li>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div>
+        {% block content %}{% endblock %}
+</div>
+<script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+<script src="{{ url_for('static', filename='plugins/bootstrap-3.4.1/js/bootstrap.min.js') }}"></script>
+{% block js %}{% endblock %}
+</body>
+</html>
