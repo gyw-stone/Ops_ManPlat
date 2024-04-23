@@ -6,13 +6,13 @@ import threading
 
 from pyVmomi import vim
 from pyVim import connect
-
+from .check_os_type import check_os_type
 def zabbix_gethost():
     """ 获取zabbix chengdu_server主机组的所有启用状态的主机"""
     # 设置 Zabbix API 访问参数
     #api_url = 'http://zabbix.cd.datagrand.com/api_jsonrpc.php'
     api_url = 'http://172.16.200.199:8080/api_jsonrpc.php'
-    auth_token = 'a2bb879a3afa51ff6db05e4882f79803f93b4d48af047d026728446bcdc72add'
+    auth_token = '8179fd5daa4ad44f631acb13f163e9e3e4d69f66dc0cb9f62231320fe6e51ca5'
 
     # 构建 API 请求体
     headers = {'Content-Type': 'application/json-rpc'}
@@ -154,15 +154,16 @@ def diff_list():
 def Create_host():
     """ 实现批量录入主机信息到zabbix,存在问题，重复录入，并且录入的IP为名字 """
 
-    dict = diff_list()
+    dict1 = diff_list()
     # 设置 Zabbix API 访问参数
     api_url = 'http://zabbix.cd.datagrand.com/api_jsonrpc.php'
-    auth_token = 'a2bb879a3afa51ff6db05e4882f79803f93b4d48af047d026728446bcdc72add'
+    auth_token = '8179fd5daa4ad44f631acb13f163e9e3e4d69f66dc0cb9f62231320fe6e51ca5'
 
     # 构建 API 请求体
     headers = {'Content-Type': 'application/json-rpc'}
 
-    for ip, value in dict.items():
+    for ip, value in dict1.items():
+        template_id = check_os_type(ip) 
         data = {
             "jsonrpc": "2.0",
             "method": "host.create",
@@ -186,7 +187,7 @@ def Create_host():
                 ],
                 "templates": [
                     {
-                        "templateid": "10001"
+                        "templateid": template_id
                     }
                 ],
             },
@@ -194,5 +195,8 @@ def Create_host():
             "id": 1
         }
         response = requests.post(api_url, headers=headers, data=json.dumps(data), verify=False)
+        if response.status_code != 200:
+           raise Exception("Request failed!")
         result = response.json()
+	
         #print(result)
