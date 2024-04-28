@@ -1,0 +1,147 @@
+{% extends 'layout.html' %}
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* 基本样式设置 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 50%;
+            margin: 0 auto;
+            padding: 1rem;
+            background-color: white;
+            box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        input,        
+        select {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 0.25rem;
+            box-sizing: border-box;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            font-size: 1rem;
+                    padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+	#nginxConfigDisplay {
+            width: 100%;
+            box-height: 2/3;
+        }
+        .centered-large-font {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem; /* 或者选择合适的字号 */
+        }
+        .custom-input {
+            font-size: 18px; /* 或选择合适的字号 */
+        } 
+        /* 响应式布局 */
+        @media (min-width: 768px) {
+            form {
+                width: 75%;
+            }
+        }
+
+    </style>
+</head>
+{% if error_message %}
+<div class="error-message centered-large-font" style="color: red;">{{ error_message }}</div>
+{% endif %}
+
+   <div style="text-align: center;">
+    <h2><span style="color: white;">域名配置-text</span></h2>
+   </div>
+    <form action="/create/domaindiy/file" method="POST">
+        <div class="form-group">
+            <label for="filename">请输入后端文件名,自带.conf（如：test-8080）:</label>
+            <input type="text" id="filename" name="filename" class="custom-input" minlength="2" required>
+            <small class="form-text text-muted">仅限字母、数字和下划线，无特殊字符</small>
+        </div>
+       <div class="form-group">
+            <label for="tocol">请选择协议类型:</label>
+            <select id="tocol" name="tocol" class="custom-input" required>
+                <option  value="HTTP">HTTP</option>
+                <option  value="TCP">TCP</option>
+            </select>
+        </div>
+
+       <div class="form-group">
+            <label for="filename">成都公网IP: 61.139.65.42</label>
+            <br>
+            <a href="https://dns.console.aliyun.com/?spm=5176.ecscore_server.top-nav.7.1e404df5XrrZjW#/dns/domainList">阿里云DNS</a>
+  
+       </div>
+       <div class="form-group">
+           <label for="filename">请编辑nginx配置文件:</label>
+           <textarea id="nginxConfigDisplay" name="nginx_config" rows="25">
+server {
+   listen 80;
+   server_name idps.datagrand.com;
+   return 301 https://$server_name$request_uri;
+}
+server {
+    server_name idps.datagrand.com;
+    listen 443 ssl;
+    ssl_certificate /etc/nginx/conf.d/ssl/datagrand.com.pem;
+    ssl_certificate_key  /etc/nginx/conf.d/ssl/datagrand.com.key;
+    # stop 3DES
+    ssl_ecdh_curve secp384r1:prime256v1;
+    # 加密算法
+    ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
+    add_header X-Frame-Options SAMEORIGIN;
+    ssl_protocols TLSv1.2,TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    client_max_body_size 5000M;
+    proxy_connect_timeout 1200;
+    keepalive_timeout 1200;
+    proxy_read_timeout 1200;
+    proxy_send_timeout 1200;
+    location / {
+        proxy_connect_timeout 1200;
+        keepalive_timeout 1200;
+        proxy_read_timeout 1200;
+        proxy_send_timeout 1200;
+        client_max_body_size 5000M;
+        proxy_set_header  Host $host;
+        proxy_set_header  X-Real-IP $remote_addr;
+        proxy_set_header  X-Forwarded-Proto https;
+        proxy_set_header  X-Forwarded-For $remote_addr;
+        proxy_set_header  X-Forwarded-Host $remote_addr;
+        proxy_pass http://idps.datagrand.cn/;
+        proxy_redirect off;
+    }
+}
+    	</textarea>
+        </div>
+    	<button type="submit">提交</button>
+    </form>
+{% endblock %}

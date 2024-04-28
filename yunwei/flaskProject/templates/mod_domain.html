@@ -51,6 +51,9 @@
         button:hover {
             background-color: #0056b3;
         }
+        .custom-input {
+            font-size: 16px; /* 或选择合适的字号 */
+        } 
 
         /* 响应式布局 */
         @media (min-width: 768px) {
@@ -60,37 +63,43 @@
         }
     </style>
 </head>
-    <h2>创建自定义域名配置</h2>
+     <div style="text-align: center;">
+       <h2><span style="color: white;">创建自定义域名配置</span></h2>
+    </div>
+   {% if error_message %}
+     <div class="error-message centered-large-font" style="color: red;">{{ error_message }}</div>
+   {% endif %}
+
     <form action="/create/domaindiy" method="POST">
         <div class="form-group">
             <label for="IP">请输入 IP 地址:</label>
-            <input type="text" id="IP" name="IP" minlength="7" required>
+            <input type="text" id="IP" name="IP" class="custom-input" minlength="7" required>
             <small class="form-text text-muted">例如：192.168.0.1</small>
         </div>
 
         <div class="form-group">
             <label for="port">请输入端口号:</label>
-            <input type="number" id="port" name="port" min="1" max="65535" required>
+            <input type="number" id="port" name="port" min="2" class="custom-input" max="65535" required>
             <small class="form-text text-muted">例如：80 或 443</small>
         </div>
 
         <div class="form-group">
             <label for="filename">请输入后端文件名,自带.conf（如：test）:</label>
-            <input type="text" id="filename" name="filename" minlength="1" required>
+            <input type="text" id="filename" name="filename" class="custom-input" minlength="8" required>
             <small class="form-text text-muted">仅限字母、数字和下划线，无特殊字符</small>
         </div>
 
         <div class="form-group">
-            <label for="domainname">域名名称（如：idps）:</label>
-            <input type="text" id="domainname" name="domainname" minlength="1" required>
+            <label for="domainname">域名名称:</label>
+            <input type="text" id="domainname" name="domainname" class="custom-input" minlength="20" required>
             <small class="form-text text-muted">仅限字母、数字和短横线（-），无其他特殊字符</small>
         </div>
 
         <div class="form-group">
-            <label for="tocol">请选择操作系统类型:</label>
-            <select id="tocol" name="tocol" required>
-                <option value="http">HTTP</option>
-                <option value="https">HTTPS</option>
+            <label for="tocol">请选择协议类型:</label>
+            <select id="tocol" name="tocol" class="custom-input" required>
+                <option  value="http">HTTP</option>
+                <option  value="https">HTTPS</option>
             </select>
         </div>
 
