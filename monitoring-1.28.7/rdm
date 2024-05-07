@@ -1,0 +1,6 @@
+sed -i "13a \ \ \ \ nodePort: 30300" grafana-service.yaml
+sed -i "11a \ \ type:\ NodePort"     grafana-service.yaml
+sed -i "14a \ \ \ \ nodePort: 30090" prometheus-service.yaml
+sed -i "12a \ \ type:\ NodePort"     prometheus-service.yaml
+sed -i "14a \ \ \ \ nodePort: 30093" alertmanager-service.yaml
+sed -i "12a \ \ type:\ NodePort"     alertmanager-service.yaml

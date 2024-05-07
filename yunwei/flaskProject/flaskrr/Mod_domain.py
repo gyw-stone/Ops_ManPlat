@@ -5,14 +5,22 @@ from flask import jsonify, make_response
 def ssh_connect_and_execute_commands(ip, new_server_name, new_domain, port, tocol):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    host="172.26.24.72"
+    host="172.16.200.126"
     username = "root"
-    password = "EQ9yqheD4qFWkd6dZC14"
+    private_key_path = "/root/.ssh/id_rsa"
     try:
-        ssh.connect(host, username=username, password=password,timeout=10)
+        with open(private_key_path, "r") as key_file:
+           private_key = paramiko.RSAKey.from_private_key(key_file)
+        ssh.connect(
+           hostname=host,
+           username=username,
+           pkey=private_key,
+           timeout=10,
+        )
+
         # 检查自定义名字.conf文件是否存在
         custom_conf_name = f"{new_server_name}.conf"
-        check_existence_command = f"ls /root/test_git/{custom_conf_name} > /dev/null 2>&1 && echo exists || echo not_exists"
+        check_existence_command = f"ls /etc/nginx/conf.d/{custom_conf_name} > /dev/null 2>&1 && echo exists || echo not_exists"
         stdin, stdout, stderr = ssh.exec_command(check_existence_command)
         output = stdout.read().decode().strip()
         
@@ -21,43 +29,43 @@ def ssh_connect_and_execute_commands(ip, new_server_name, new_domain, port, toco
         else:
 
             if tocol == "https":
-                tempfile = "/root/test_git/https.template"
+                tempfile = "/etc/nginx/conf.d/template/https.template"
                 last_segment = new_domain.split('.')[-1]
 		
-                ssh.exec_command(f"cp {tempfile} /root/test_git/{custom_conf_name}")
+                ssh.exec_command(f"cp {tempfile} /etc/nginx/conf.d/{custom_conf_name}")
                 if last_segment == 'cn':
-                    sed_command = f"sed -i 's|datagrand.com.pem;|ssl_cn/datagrand.cn.pem;|; s|datagrand.com.key;|ssl_cn/datagrand.cn.key;|' /root/test_git/{custom_conf_name}"
+                    sed_command = f"sed -i 's|datagrand.com.pem;|ssl_cn/datagrand.cn.pem;|; s|datagrand.com.key;|ssl_cn/datagrand.cn.key;|' /etc/nginx/conf.d/{custom_conf_name}"
                     ssh.exec_command(sed_command)
             else:
-                tempfile = "/root/test_git/http.template"
+                tempfile = "/etc/nginx/conf.d/template/http.template"
 
                  # 执行命令：复制模板文件并重命名
-                ssh.exec_command(f"cp {tempfile} /root/test_git/{custom_conf_name}")
+                ssh.exec_command(f"cp {tempfile} /etc/nginx/conf.d/{custom_conf_name}")
 
             # 执行命令：使用sed替换server_name
-            sed_command = f"sed -i 's/server_name domain;/server_name {new_domain};/' /root/test_git/{custom_conf_name}"
+            sed_command = f"sed -i 's/server_name domain;/server_name {new_domain};/' /etc/nginx/conf.d/{custom_conf_name}"
             ssh.exec_command(sed_command)
 
             # 执行命令：使用sed替换proxy_pass
-            sed_command = f"sed -i 's|proxy_pass http://ip:port/;|proxy_pass http://{ip}:{port}/;|' /root/test_git/{custom_conf_name}"
+            sed_command = f"sed -i 's|proxy_pass http://ip:port/;|proxy_pass http://{ip}:{port}/;|' /etc/nginx/conf.d/{custom_conf_name}"
             ssh.exec_command(sed_command)
-            # # 执行命令：检查Nginx配置
-            # stdin, stdout, stderr = ssh.exec_command("nginx -t")
-            #
-            # # 检查输出以确定是否有错误
-            # output = stdout.read().decode().strip()
-            # error = stderr.read().decode().strip()
-            #
-            # if re.search(r"test is successful", output, re.IGNORECASE):
-            #     print("Nginx configuration test passed.")
-            #     # 执行命令：重新加载Nginx配置
-            #     ssh.exec_command("nginx -s reload")
-            #     print("Nginx configuration reloaded.")
-            # else:
-            #     print("Nginx configuration test failed:")
-            #     print(output)
-            #     print(error)
-            #     raise Exception("Nginx configuration check failed.")
+             # 执行命令：检查Nginx配置
+            stdin, stdout, stderr = ssh.exec_command("nginx -t")
+            
+             # 检查输出以确定是否有错误
+            output = stdout.read().decode('gbk').strip()
+            error = stderr.read().decode('gbk').strip()
+            
+            if re.search(r"successful", output, re.IGNORECASE):
+                 print("Nginx configuration test passed.")
+                 # 执行命令：重新加载Nginx配置
+                 ssh.exec_command("nginx -s reload")
+                 print("Nginx configuration reloaded.")
+            else:
+                 print("Nginx configuration test failed:")
+                 print(output)
+                 print(error)
+                 raise Exception("Nginx configuration check failed.")
 
     except Exception as e:
         print(f"SSH connection or command execution error: {e}")
@@ -66,7 +74,7 @@ def ssh_connect_and_execute_commands(ip, new_server_name, new_domain, port, toco
 def ssh_connect_and_execute_commands_text(new_filename, text, tocol):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    host="172.26.24.77"
+    host="172.16.200.126"
     username = "root"
     private_key_path = "/root/.ssh/id_rsa"
     try:
@@ -80,7 +88,7 @@ def ssh_connect_and_execute_commands_text(new_filename, text, tocol):
         )
         # 检查自定义名字.conf文件是否存在
         custom_conf_name = f"{new_filename}.conf"
-        check_existence_command = f"ls /root/test_git/{custom_conf_name} > /dev/null 2>&1 && echo exists || echo not_exists"
+        check_existence_command = f"ls /etc/nginx/conf.d/{custom_conf_name} > /dev/null 2>&1 && echo exists || echo not_exists"
         stdin, stdout, stderr = ssh.exec_command(check_existence_command)
         output = stdout.read().decode().strip()
         if output == "exists":
@@ -88,9 +96,9 @@ def ssh_connect_and_execute_commands_text(new_filename, text, tocol):
         else:
             data = str(text)
             if tocol == "TCP":
-               init_command = f"echo '{data}' >> /root/test_git/strem.d/{custom_conf_name}"
+               init_command = f"echo '{data}' >> /etc/nginx/stream.d/{custom_conf_name}"
             else:
-               init_command = f"echo '{data}' >> /root/test_git/{custom_conf_name}"
+               init_command = f"echo '{data}' >> /etc/nginx/conf.d/{custom_conf_name}"
             ssh.exec_command(init_command)
 
     except (paramiko.AuthenticationException, paramiko.SSHException, socket.error) as e:

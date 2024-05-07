@@ -11,12 +11,12 @@
         <thead>
     <form action="/getpasswd" method="POST">
         <label for="length">Password Length:</label>
-        <input type="number" id="length" name="length" min="1" required>
+        <input type="number" id="length" name="length" class="custom-input" min="1" required>
         <label for="pwd_type">Password Type:</label>
-        <select id="pwd_type" name="pwd_type">
+        <select id="pwd_type" name="pwd_type" class="custom-input">
+            <option value="number,letter">数字和字母</option>
             <option value="number">纯数字</option>
             <option value="letter">纯字母</option>
-            <option value="number,letter">数字和字母</option>
             <option value="number,letter,symbol">All</option>
         </select>
         <button type="submit">Generate Password</button>

@@ -2,12 +2,78 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>运维管理平台</title>
+    <title>🌟运维管理平台🌟</title>
     <link rel="stylesheet" href="{{ url_for('static',filename='plugins/bootstrap-3.4.1/css/bootstrap.min.css') }}">
     <style>
+        title {
+            color: #333;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 50px;
+            font-family: Arial, sans-serif;
+	}
         .navbar{
             border-radius: 0;
         }
+        /* 基本样式设置 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 50%;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: white;
+            box-shadow: 0 0 2rem rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        input,
+        select {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 0.25rem;
+            box-sizing: border-box;
+            width: 100%;
+     margin-bottom: 1rem;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+        .custom-input {
+            font-size: 16px; /* 或选择合适的字号 */
+        }
+
+        /* 响应式布局 */
+        @media (min-width: 768px) {
+            form {
+                width: 75%;
+            }
+        }
+
     </style>
     {% block css %}
     {% endblock %}
@@ -42,7 +108,7 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                  aria-expanded="false">常用文档查询<span class="caret"></span></a>
 	      <ul class="dropdown-menu">
-                <li><a href="">文档展示</a></li>
+                <li><a href="http://172.26.24.72:4000/" target="_blank" style="color: blue;">运维查询窗口</a></li>
             </ul>
           </li>
         </li>
