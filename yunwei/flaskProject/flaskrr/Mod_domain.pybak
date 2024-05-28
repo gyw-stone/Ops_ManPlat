@@ -1,0 +1,152 @@
+import paramiko
+import re, socket
+from flask import jsonify, make_response
+
+def ssh_connect_and_execute_commands(ip, new_server_name, new_domain, port, tocol):
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    host="172.16.200.126"
+    username = "root"
+    private_key_path = "/root/.ssh/id_rsa"
+    try:
+        with open(private_key_path, "r") as key_file:
+           private_key = paramiko.RSAKey.from_private_key(key_file)
+        ssh.connect(
+           hostname=host,
+           username=username,
+           pkey=private_key,
+           timeout=10,
+        )
+
+        # 检查自定义名字.conf文件是否存在
+        custom_conf_name = f"{new_server_name}.conf"
+        check_existence_command = f"ls /etc/nginx/conf.d/{custom_conf_name} > /dev/null 2>&1 && echo exists || echo not_exists"
+        stdin, stdout, stderr = ssh.exec_command(check_existence_command)
+        output = stdout.read().decode().strip()
+        
+        if output == "exists":
+            return make_response(jsonify({'error': f'File {custom_conf_name} already exists. Skipping template copy and modification.'}), 404)
+        else:
+
+            if tocol == "https":
+                tempfile = "/etc/nginx/conf.d/template/https.template"
+                last_segment = new_domain.split('.')[-1]
+		
+                ssh.exec_command(f"cp {tempfile} /etc/nginx/conf.d/{custom_conf_name}")
+                if last_segment == 'cn':
+                    sed_command = f"sed -i 's|datagrand.com.pem;|ssl_cn/datagrand.cn.pem;|; s|datagrand.com.key;|ssl_cn/datagrand.cn.key;|' /etc/nginx/conf.d/{custom_conf_name}"
+                    ssh.exec_command(sed_command)
+            else:
+                tempfile = "/etc/nginx/conf.d/template/http.template"
+
+                 # 执行命令：复制模板文件并重命名
+                ssh.exec_command(f"cp {tempfile} /etc/nginx/conf.d/{custom_conf_name}")
+
+            # 执行命令：使用sed替换server_name
+            sed_command = f"sed -i 's/server_name domain;/server_name {new_domain};/' /etc/nginx/conf.d/{custom_conf_name}"
+            ssh.exec_command(sed_command)
+
+            # 执行命令：使用sed替换proxy_pass
+            sed_command = f"sed -i 's|proxy_pass http://ip:port/;|proxy_pass http://{ip}:{port}/;|' /etc/nginx/conf.d/{custom_conf_name}"
+            ssh.exec_command(sed_command)
+             # 执行命令：检查Nginx配置
+            stdin, stdout, stderr = ssh.exec_command("nginx -t")
+            
+             # 检查输出以确定是否有错误
+            output = stdout.read().decode('gbk').strip()
+            error = stderr.read().decode('gbk').strip()
+            
+            if re.search(r"successful", output, re.IGNORECASE):
+                 print("Nginx configuration test passed.")
+                 # 执行命令：重新加载Nginx配置
+                 ssh.exec_command("nginx -s reload")
+                 print("Nginx configuration reloaded.")
+            else:
+                 print("Nginx configuration test failed:")
+                 print(output)
+                 print(error)
+                 raise Exception("Nginx configuration check failed.")
+
+    except Exception as e:
+        print(f"SSH connection or command execution error: {e}")
+    finally:
+     # 执行命令：检查Nginx配置
+        stdin, stdout, stderr = ssh.exec_command("nginx -t")
+
+        # 检查输出以确定是否有错误
+        output = stdout.read().decode('gbk').strip()
+        error = stderr.read().decode('gbk').strip()
+
+        if re.search(r"successful", output, re.IGNORECASE):
+             print("Nginx configuration test passed.")
+             # 执行命令：重新加载Nginx配置
+             ssh.exec_command("nginx -s reload")
+             print("Nginx configuration reloaded.")
+        else:
+             print("Nginx configuration test failed:")
+             print(output)
+             print(error)
+             raise Exception("Nginx configuration check failed.")
+
+        ssh.close()
+def ssh_connect_and_execute_commands_text(new_filename, text, tocol):
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    host="172.16.200.126"
+    username = "root"
+    private_key_path = "/root/.ssh/id_rsa"
+    try:
+        with open(private_key_path, "r") as key_file:
+           private_key = paramiko.RSAKey.from_private_key(key_file)
+        ssh.connect(
+           hostname=host,
+           username=username,
+           pkey=private_key,
+           timeout=10,
+        )
+        # 检查自定义名字.conf文件是否存在
+        custom_conf_name = f"{new_filename}.conf"
+        check_existence_command = f"ls /etc/nginx/conf.d/{custom_conf_name} > /dev/null 2>&1 && echo exists || echo not_exists"
+        stdin, stdout, stderr = ssh.exec_command(check_existence_command)
+        output = stdout.read().decode().strip()
+        if output == "exists":
+            return make_response(jsonify({'error': f'File {custom_conf_name} already exists.'}), 404)
+        else:
+            data = str(text)
+            if tocol == "TCP":
+               init_command = f"echo '{data}' >> /etc/nginx/stream.d/{custom_conf_name}"
+            else:
+               init_command = f"echo '{data}' >> /etc/nginx/conf.d/{custom_conf_name}"
+            ssh.exec_command(init_command)
+
+    except (paramiko.AuthenticationException, paramiko.SSHException, socket.error) as e:
+       print(f"SSH connection error: {e}")
+       return make_response(jsonify({'error': 'SSH authentication failed'}), 500)
+    except socket.timeout:
+        print("Connection timed out")
+        return make_response(jsonify({'error': 'SSH connection timed out'}), 504)
+    except Exception as e:
+        print(f"Unexpected error occurred: {e}")
+        return make_response(jsonify({'error': 'An unexpected error occurred'}), 500)
+
+    finally:
+         # 执行命令：检查Nginx配置
+         stdin, stdout, stderr = ssh.exec_command("nginx -t")
+
+         # 检查输出以确定是否有错误
+         output = stdout.read().decode('gbk').strip()
+         error = stderr.read().decode('gbk').strip()
+
+         if re.search(r"successful", output, re.IGNORECASE):
+              print("Nginx configuration test passed.")
+              # 执行命令：重新加载Nginx配置
+              ssh.exec_command("nginx -s reload")
+              print("Nginx configuration reloaded.")
+         else:
+              print("Nginx configuration test failed:")
+              print(output)
+              print(error)
+              raise Exception("Nginx configuration check failed.")
+
+        ssh.close()
+
