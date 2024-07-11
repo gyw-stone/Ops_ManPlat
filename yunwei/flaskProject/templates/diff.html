@@ -1,13 +1,14 @@
 {% extends 'layout.html' %}
 {% block content %}
+<div class="jumbotron jumbotron-lg jumbotron-fluid mb-0 pb-3 bg-primary position-relative">
     <div class="container">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
-                未接入监控列表
+                <h3 class="text-white">未接入监控列表</h3>
             </div>
 	    <form action="/gethost" method="POST">
-              <label for="answer">请选择是否自动录入</label>
+              <label for="answer" class="text-white">请选择是否自动录入</label>
               <select id="answer" name="answer" required>
                 <option value="YES">YES</option>
                 <option value="NO">NO</option>
@@ -18,15 +19,15 @@
             <table class="table table-bordered">
         <thead>
           <tr>
-            <th>IP</th>
-            <th>名称</th>
+            <th class="text-white">IP</th>
+            <th class="text-white">名称</th>
           </tr>
         </thead>
         <tbody>
             {% for ip, key in different_ips_dict.items() %}
             <tr>
-                <td>{{ ip }}</td>
-                <td>{{ key }}</td>
+                <td class="text-white">{{ ip }}</td>
+                <td class="text-white">{{ key }}</td>
             </tr>
           </tr>
         {% endfor %}
@@ -38,4 +39,5 @@
         {{ page_string }}
     </ul>
     </div>
+</div>
 {% endblock %}

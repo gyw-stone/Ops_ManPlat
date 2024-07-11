@@ -1,38 +1,51 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <div class="container">
+
+<!-- Main -->
+<div class="d-md-flex h-md-100 align-items-center">
+	<div class="col-md-6 p-0 bg-indigo h-md-100">
+		<div class="text-white d-md-flex align-items-center h-100 p-5 text-center justify-content-center">
+			<div class="logoarea pt-5 pb-5">
+				<p>
+					<i class="fa fa-anchor fa-3x"></i>
+				</p>
+				<h1 class="mb-0 mt-3 display-4">随机密码生成器</h1>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6 p-0 bg-white h-md-100 loginarea">
+		<div class="d-md-flex align-items-center h-md-100 p-5 justify-content-center">
+
+<div class="container">
         <div class="panel panel-default">
-            <div class="panel-heading">
-                <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
-                随机密码生成器
-            </div>
               <!-- Table -->
-            <table class="table table-bordered">
-        <thead>
+   <table class="table table-bordered">
+    <thead>
     <form action="/getpasswd" method="POST">
-        <label for="length">Password Length:</label>
+        <label for="length">密码长度:</label>
         <input type="number" id="length" name="length" class="custom-input" min="1" required>
-        <label for="pwd_type">Password Type:</label>
+        <label for="pwd_type">密码类型:</label>
         <select id="pwd_type" name="pwd_type" class="custom-input">
             <option value="number,letter">数字和字母</option>
             <option value="number">纯数字</option>
             <option value="letter">纯字母</option>
-            <option value="number,letter,symbol">All</option>
+            <option value="number,letter,symbol">所有</option>
         </select>
-        <button type="submit">Generate Password</button>
+        <button type="submit">生成密码</button>
     </form>
+   <div>
     {% if password %}
-        <h2>Generated Password:</h2>
-        <p>{{ password }}</p>
+        <h4>密码:</h4>
+        <p class="iconbox text-black">{{ password }}</p>
     {% endif %}
-
-      </table>
+   </div>
+  </table>
 
 </div>
     <ul class="pagination">
         {{ page_string }}
     </ul>
-    </div>
+</div>
 {% endblock %}
 
 

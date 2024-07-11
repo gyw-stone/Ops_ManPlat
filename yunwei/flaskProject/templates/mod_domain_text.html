@@ -1,6 +1,5 @@
 {% extends 'layout.html' %}
 {% block content %}
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -85,7 +84,7 @@
         }
 
     </style>
-</head>
+<div class="jumbotron jumbotron-lg jumbotron-fluid mb-0 pb-3 bg-primary position-relative">
 {% if error_message %}
 <div class="error-message centered-large-font" style="color: red;">{{ error_message }}</div>
 {% endif %}
@@ -221,4 +220,5 @@ server {
     document.getElementById('nginxConfigDisplayHTTP').addEventListener('input', updateHiddenTextarea);
     document.getElementById('nginxConfigDisplayTCP').addEventListener('input', updateHiddenTextarea);
 </script>
+</div>
 {% endblock %}

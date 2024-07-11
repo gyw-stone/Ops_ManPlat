@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <div class="container">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+                未接入监控列表
+            </div>
+	    <form action="/gethost" method="POST">
+              <label for="answer">请选择是否自动录入</label>
+              <select id="answer" name="answer" required>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+             </select>
+	     <button type="submit">Submit</button>
+	    </form>
+              <!-- Table -->
+            <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>IP</th>
+            <th>名称</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for ip, key in different_ips_dict.items() %}
+            <tr>
+                <td>{{ ip }}</td>
+                <td>{{ key }}</td>
+            </tr>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+
+</div>
+    <ul class="pagination">
+        {{ page_string }}
+    </ul>
+    </div>
+{% endblock %}
