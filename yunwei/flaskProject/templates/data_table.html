@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <style>
+        table.data {
+            width: 50%;
+            margin: 50px auto;
+            border-collapse: collapse;
+        }
+        table.data, table.data th, table.data td {
+            border: 1px solid black;
+        }
+        table.data th, table.data td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<h1 style="text-align:center; color: white;">Host data</h1>
+    <div>
+        {% for table in tables %}
+            {{ table|safe }}
+        {% endfor %}
+    </div>
+{% endblock %}

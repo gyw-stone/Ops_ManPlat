@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: 
+  name: {{ .Release.Name }}-{{ .Chart.Name }}
+  namespace: ns-{{ .Release.Name }}
+spec: 
+  replicas: {{ .Values.replicaCount }}
+  updateStrategy: 
+    type: {{ .Values.updateStrategy }}
+  podManagementPolicy: {{ .Values.managerPolicy }}
+  selector: 
+    matchLabels: 
+      {{- include "kafka.selectorLabels" . | nindent 6 }}
+  serviceName: {{ .Release.Name }}-{{ .Chart.Name }}-service
+  template: 
+    metadata: 
+      labels: 
+        {{- include "kafka.selectorLabels" . | nindent 8 }}
+    spec: 
+      containers: 
+      - name: {{ .Release.Name }}-{{ .Chart.Name }}
+        imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        resources: 
+          {{- toYaml .Values.resources | nindent 10 }}
+        env: {{- include "kafka.env" . | nindent 10 }}
+

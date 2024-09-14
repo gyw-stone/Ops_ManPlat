@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata: 
+  name: {{ .Release.Name }}-{{ .Chart.Name }}-inner-service
+  namespace: ns-{{ .Release.Name }}
+  labels: 
+    {{- include "zk.selectorLabels" . |nindent 4 }} 
+spec: 
+  selector: 
+    {{- include "zk.selectorLabels" . |nindent 4 }}
+  clusterIP: None
+  ports: 
+    {{- toYaml .Values.global.service.inner.info | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: {{ .Release.Name }}-{{ .Chart.Name }}-client-service
+  namespace: ns-{{ .Release.Name }}
+  labels:
+    {{- include "zk.selectorLabels" . |nindent 4 }} 
+spec: 
+  selector:
+    {{- include "zk.selectorLabels" . |nindent 4 }}
+  {{- with .Values.global.service.client }}
+  type: {{ .type }}
+  ports:
+    {{- toYaml .info | nindent 4 }}
+  {{- end }}

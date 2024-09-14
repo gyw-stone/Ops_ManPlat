@@ -1,0 +1,41 @@
+global:
+  chartName: zookeeper
+  service: 
+    inner:
+      name: inner
+      info: 
+        - name: server-port
+          port: 2888
+          protocol: TCP
+          targetPort: 2888
+        - name: leader-election-port
+          port: 3888
+          protocol: TCP
+          targetPort: 3888
+    client:  
+      name: client
+      type: NodePort
+      info:
+        - name: client-port
+          port: 2181
+          protocol: TCP
+          targetPort: 2181
+          nodePort: 30181
+
+replicaCount: 1
+updateStrategy: RollingUpdate
+managerPilicy: Parallel
+
+image: 
+  repository: docker.cloudimages.asia/zookeeper
+  pullPolicy: IfNotPresent
+  tag: 3.7.2
+
+resources: 
+  limits: 
+    cpu: 1000m
+    memory: 2048Mi
+  requests: 
+    cpu: 1000m
+    memory: 1024Mi
+

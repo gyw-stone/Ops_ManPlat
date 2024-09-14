@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata: 
+  name: {{ .Release.Name }}-{{ .Chart.Name }}-service
+  namespace: ns-{{ .Release.Name }}
+  labels: 
+    {{- include "kafka.selectorLabels" . |nindent 4 }} 
+spec: 
+  selector: 
+    {{- include "kafka.selectorLabels" . |nindent 4 }}
+  {{- with .Values.service }}
+  type: {{ .type }}
+  ports: 
+    {{- toYaml .info | nindent 4 }}
+  {{- end }}

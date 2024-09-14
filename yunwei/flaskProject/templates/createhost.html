@@ -3,7 +3,7 @@
 <div class="jumbotron jumbotron-lg jumbotron-fluid mb-0 pb-3 bg-primary position-relative">
     <div class="container">
         <div class="panel panel-default">
-            <div class="panel-heading">
+            <div class="panel-heading text-white">
                 <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
                 接入zabbix主机
             </div>
@@ -11,11 +11,11 @@
             <table class="table table-bordered">
         <thead>
     <form action="/gethost/createhost" method="POST">
-        <label for="IP">请输入IP地址:</label>
+        <label class="text-white" for="IP">请输入IP地址:</label>
         <input type="test" id="IP" name="IP" min="1" required>
-        <label for="name">请输入别名:</label>
+        <label class="text-white" for="name">请输入别名:</label>
         <input type="test" id="name" name="name" min="1" required>
-        <label for="os_type">请选择操作系统类型:</label>
+        <label class="text-white" for="os_type">请选择操作系统类型:</label>
 	<select id="os_type" name="os_type" required>
 		<option value="linux">Linux</option>
 		<option value="windows">Windows</option>
