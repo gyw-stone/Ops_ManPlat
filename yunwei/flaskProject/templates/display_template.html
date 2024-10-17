@@ -1,0 +1,186 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* 基本样式设置 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 50%;
+            margin: 0 auto;
+            padding: 1rem;
+            background-color: white;
+            box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        input,        
+        select {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 0.25rem;
+            box-sizing: border-box;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            font-size: 1rem;
+                    padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+	#nginxConfigDisplay {
+            width: 100%;
+            box-height: 2/3;
+        }
+         #httpTextareaContainer textarea {
+           width: 100%; /* 减去左右可能存在的边距 */
+           box-height: 2/3;
+        }
+
+         #tocolSelect {
+            width: 100%;
+         }
+         #tcpTextareaContainer textarea {
+           width: 100%; /* 减去左右可能存在的边距 */
+           box-height: 2/3;
+        }
+
+        .centered-large-font {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem; /* 或者选择合适的字号 */
+        }
+        .custom-input {
+            font-size: 18px; /* 或选择合适的字号 */
+        } 
+        /* 响应式布局 */
+        @media (min-width: 768px) {
+            form {
+                width: 75%;
+            }
+        }
+
+    </style>
+<div class="jumbotron jumbotron-lg jumbotron-fluid mb-0 pb-3 bg-primary position-relative">
+{% if error_message %}
+<div class="error-message centered-large-font" style="color: red;">{{ error_message }}</div>
+{% endif %}
+
+   <div style="text-align: center;">
+    <h2><span style="color: white;">域名配置-text</span></h2>
+   </div>
+    <form action="/create/domaindiy/file" method="GET">
+       <div class="form-group">
+            <label for="tocol">请选择模版类型:</label>
+            <select id="tocol" name="tocol" class="custom-input" required>
+                <option  value="op1">机器开通</option>
+                <option  value="op2">新人账号开通</option>
+            </select>
+        </div>
+<div class="form-group">
+<!-- 隐藏的通用 textarea，用于存储最终提交的值 -->
+<textarea id="hiddenNginxConfig" name="nginx_config" style="display:none;"></textarea>
+
+<label for="filename">话术模版</label>
+<!-- 分别对应 HTTP 和 TCP 的文本域，初始时都隐藏 -->
+<div id="op1TextareaContainer"  style="display:block;">
+   <textarea id="nginxConfigDisplayop1" name="nginx_config" rows="25">
+k8s dashboard
+kubepi.cd.datagrand.com (内网）
+name: wangwenjun(修改处）
+passwd: 123456 （默认密码）
+
+修改密码网址，ldap.cd.datargand.com(与上面密码一致）
+修改用户：主页右上角个人中心，忘记密码可通过邮箱更改
+
+个人用户kubeconfig，进入dashboard，选择kunpeng集群右上角terminal终端进入，.kube/config 放入到机器配置即可命令行操作
+namespace：
+pv：
+pvc: 
+nfs挂载路径以及IP：192.168.185.56 /data/sdv1/k8s_nfs/pv_
+    
+    </textarea>
+</div>
+<div id="op2TextareaContainer" style="display:none;">
+    <textarea id="nginxConfigDisplayop2" name="nginx_config" rows="25">
+upstream  name {
+  server IP:PORT weight=5 max_fails=3 fail_timeout=30s;
+
+}
+server {
+    listen PORT;
+    proxy_pass name;
+    proxy_timeout 300s;
+    proxy_connect_timeout 5s;
+}
+
+    </textarea>
+</div>
+
+       </div>
+
+        <button type="submit">提交</button>
+    </form>
+<script>
+    document.getElementById('tocol').addEventListener('change', function () {
+        const selectedProtocol = this.value;
+
+        // 隐藏所有文本域容器
+        document.getElementById('httpTextareaContainer').style.display = 'none';
+        document.getElementById('tcpTextareaContainer').style.display = 'none';
+
+        // 显示对应协议类型的文本域容器
+        if (selectedProtocol === 'HTTP') {
+            document.getElementById('httpTextareaContainer').style.display = 'block';
+            document.getElementById('nginxConfigDisplayHTTP').focus();
+        } else if (selectedProtocol === 'TCP') {
+            document.getElementById('tcpTextareaContainer').style.display = 'block';
+            document.getElementById('nginxConfigDisplayTCP').focus();
+        }
+
+        // 更新通用隐藏 textarea 的值
+        updateHiddenTextarea();
+    });
+
+    function updateHiddenTextarea() {
+        const selectedProtocol = document.getElementById('tocol').value;
+        let configValue;
+
+        if (selectedProtocol === 'HTTP') {
+            configValue = document.getElementById('nginxConfigDisplayHTTP').value;
+        } else if (selectedProtocol === 'TCP') {
+            configValue = document.getElementById('nginxConfigDisplayTCP').value;
+        }
+
+        document.getElementById('hiddenNginxConfig').value = configValue;
+    }
+
+    // 监听 HTTP 和 TCP 文本域的输入事件，实时更新通用隐藏 textarea 的值
+    document.getElementById('nginxConfigDisplayHTTP').addEventListener('input', updateHiddenTextarea);
+    document.getElementById('nginxConfigDisplayTCP').addEventListener('input', updateHiddenTextarea);
+</script>
+</div>
+{% endblock %}

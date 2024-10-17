@@ -5,7 +5,6 @@ import requests,jsonify
 import pandas as pd
 
 from functools import wraps
-from datetime import datetime, timedelta
 from flask import Flask, render_template, url_for, session, request, jsonify, make_response, flash, redirect
 
 from flaskrr import Get_Host, Get_Rand_ps,Create_Zabbix_Host_1,Mod_domain
@@ -30,23 +29,11 @@ app.secret_key = 'FpC4sK0IBVgbeXw8j8iehoEp4awsdPsv'
 # 模拟用户名和密码
 USERNAME = 'admin@datagrand.com'
 PASSWORD = 'qwer1234'
-
-# set expired time 6 hours
-EXPIRATION_TIME = timedelta(hours=6)
-
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'logged_in' not in session or 'expires_at' not in session:
+        if 'logged_in' not in session:
             return redirect(url_for('login'))
-        expires_at = datetime.fromisoformat(session['expires_at'])
-        if datetime.utcnow() > expires_at:
-            session.clear()
-            flash('Your session has expired. Please log in again.')
-            return redirect(url_for('login'))
-        
-        # 更新最后活动时间
-        session['expires_at'] = (datetime.utcnow() + EXPIRATION_TIME).isoformat()
         return f(*args, **kwargs)
 
     return decorated_function
@@ -59,7 +46,6 @@ def login():
 
         if username == USERNAME and password == PASSWORD:
             session['logged_in'] = True
-            session['expires_at'] = (datetime.utcnow() + EXPIRATION_TIME).isoformat()
             flash('Login successful!')
             return redirect(url_for('index'))
         else:
@@ -68,7 +54,9 @@ def login():
 @app.route('/')
 @login_required
 def index():
-    return render_template('test.html')
+    if 'logged_in' in session:
+	    return render_template('test.html')
+
 
 @app.route('/getpasswd', methods=["GET", "POST"])
 @login_required
