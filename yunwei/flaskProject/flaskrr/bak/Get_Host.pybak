@@ -3,10 +3,11 @@ import json
 import ssl
 import re
 import threading
+import concurrent.futures
 
 from pyVmomi import vim
 from pyVim import connect
-
+from .check_os_type import check_os_type
 def zabbix_gethost():
     """ 获取zabbix chengdu_server主机组的所有启用状态的主机"""
     # 设置 Zabbix API 访问参数
@@ -44,10 +45,10 @@ def zabbix_gethost():
                 s3.append([host['host'], host['name']])
     else:
         print(f"API Request Error: {result['error']['message']}")
+    # print(s3)
     return s3
 class VCenterHostGetter:
     """ 获取主机名以及对应的IP地址 """
-
     def __init__(self, host, user, password):
         self.host = host
         self.user = user
@@ -59,18 +60,21 @@ class VCenterHostGetter:
             vm_name = vm.name
 
             for network in vm.guest.net:
-                ip_address = network.ipAddress
-                ip_address = str(ip_address)
+                ip_address = str(network.ipAddress)
                 ip_matches = re.findall(r'\d+\.\d+\.\d+\.\d+', ip_address)
                 if ip_matches:
                     ip_address = ip_matches[0]
-                else:
-                    ip_address = ""
+                elif not ip_address:
+                    # 从 vm_name 中提取两个数字部分
+                    match = re.search(r'(\d+)_(\d+)', vm_name)
+                    if match:
+                        first_number, second_number= match.group
+                        ip_address = f"172.26.{first_number}.{second_number}"
 
-                if not ip_address.endswith(".1"):
-                    if ip_address.startswith("172"):
+                if ip_address and not ip_address.endswith(".1") and  ip_address.startswith("172"):
                         vm_info.append([vm_name, ip_address])
 
+        # print(vm_info)
         return vm_info
 
     def get_host_info(self):
@@ -79,32 +83,21 @@ class VCenterHostGetter:
             context.verify_mode = ssl.CERT_NONE
 
             # 连接到 vCenter
-            si = connect.SmartConnect(host=self.host,
-                                      user=self.user,
-                                      pwd=self.password,
-                                      port=443,
-                                      sslContext=context)
+            try:
+                si = connect.SmartConnect(host=self.host, user=self.user, pwd=self.password, port=443,
+                                          sslContext=context)
+                content = si.RetrieveContent()
+                vm_view = content.viewManager.CreateContainerView(content.rootFolder, [vim.VirtualMachine], True)
+                vms = vm_view.view
 
-            # 获取 vCenter 中的虚拟主机（虚拟机）
-            content = si.RetrieveContent()
-            vm_view = content.viewManager.CreateContainerView(content.rootFolder, [vim.VirtualMachine], True)
-            vms = vm_view.view
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    vm_info_list = list(executor.map(self.process_vm, vms))
 
-            vm_info_list = []
-            threads = []
+                vm_info_list = [item for sublist in vm_info_list for item in sublist]
+            finally:
+                connect.Disconnect(si)
 
-            # 遍历虚拟主机（虚拟机）并启动线程处理
-            for vm in vms:
-                t = threading.Thread(target=lambda x: vm_info_list.extend(self.process_vm(x)), args=(vm,))
-                t.start()
-                threads.append(t)
-
-            # 等待所有线程完成
-            for t in threads:
-                t.join()
-
-            # 断开与 vCenter 的连接
-            connect.Disconnect(si)
+            # print(vm_info_list)
 
             return vm_info_list
 
@@ -138,31 +131,22 @@ def diff_list():
 
     for t in threads:
         t.join()
-    # 查找不同的IP地址和name
-#    for item in vm_info_list:
-#        if len(item) > 1 and item[1] not in ip_list1:
-#            ip = item[1]
-#            key = item[0]
-            #if ip=='172.16.83.13':
-#            if ip.startswith("172.16.83"):
-#                continue
-#            else:
-#                different_ips_dict[ip] = key
     return different_ips_dict
 
 
 def Create_host():
     """ 实现批量录入主机信息到zabbix,存在问题，重复录入，并且录入的IP为名字 """
 
-    dict = diff_list()
+    dict1 = diff_list()
     # 设置 Zabbix API 访问参数
     api_url = 'http://zabbix.cd.datagrand.com/api_jsonrpc.php'
-    auth_token = 'a2bb879a3afa51ff6db05e4882f79803f93b4d48af047d026728446bcdc72add'
+    auth_token = '8179fd5daa4ad44f631acb13f163e9e3e4d69f66dc0cb9f62231320fe6e51ca5'
 
     # 构建 API 请求体
     headers = {'Content-Type': 'application/json-rpc'}
 
-    for ip, value in dict.items():
+    for ip, value in dict1.items():
+        template_id = check_os_type(ip) 
         data = {
             "jsonrpc": "2.0",
             "method": "host.create",
@@ -186,7 +170,7 @@ def Create_host():
                 ],
                 "templates": [
                     {
-                        "templateid": "10001"
+                        "templateid": template_id
                     }
                 ],
             },
@@ -194,5 +178,8 @@ def Create_host():
             "id": 1
         }
         response = requests.post(api_url, headers=headers, data=json.dumps(data), verify=False)
+        if response.status_code != 200:
+           raise Exception("Request failed!")
         result = response.json()
+	
         #print(result)

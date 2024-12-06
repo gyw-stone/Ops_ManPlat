@@ -1,0 +1,21 @@
+{	
+	"registry-mirrors": ["https://4p5gxeik.mirror.aliyuncs.com"],
+	"exec-opts": ["native.cgroupdriver=systemd"],
+	"storage-driver": "overlay2",
+	"storage-opts":["overlay2.override_kernel_check=true"],
+	"log-driver": "json-file",
+	"log-opts": {
+	"max-size": "500m",
+	"max-file": "3"
+	},
+	"oom-score-adjust": -1000,
+	"bip": "172.20.0.1/16",
+	"fixed-cidr": "172.20.0.0/24",
+	"metrics-addr" : "0.0.0.0:9323",
+	"experimental" : true,
+	"default-address-pools": [
+	{"base": "10.252.0.0/24", "size": 24},
+	{"base": "10.252.1.0/24", "size": 24},
+	{"base": "10.252.2.0/24", "size": 24}
+	]
+}

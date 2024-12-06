@@ -1,0 +1,38 @@
+2024-12-06 10:51:55,107 - app - ERROR - Exception on /gethost [GET]
+Traceback (most recent call last):
+  File "/usr/local/python3/lib/python3.10/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/local/python3/lib/python3.10/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/local/python3/lib/python3.10/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/local/python3/lib/python3.10/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/new/data/yunwei/flaskProject/app.py", line 64, in decorated_function
+    return f(*args, **kwargs)
+  File "/new/data/yunwei/flaskProject/app.py", line 108, in GetHost
+    different_ips_dict = Get_Host.diff_list()
+  File "/new/data/yunwei/flaskProject/flaskrr/Get_Host.py", line 114, in diff_list
+    vm_info_list = [row[:2] for row in vm_info_list  if "VMware vCenter Server" not in vm["name"]]
+  File "/new/data/yunwei/flaskProject/flaskrr/Get_Host.py", line 114, in <listcomp>
+    vm_info_list = [row[:2] for row in vm_info_list  if "VMware vCenter Server" not in vm["name"]]
+NameError: name 'vm' is not defined
+2024-12-06 10:52:03,516 - app - ERROR - Exception on /gethost [GET]
+Traceback (most recent call last):
+  File "/usr/local/python3/lib/python3.10/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/local/python3/lib/python3.10/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/local/python3/lib/python3.10/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/local/python3/lib/python3.10/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/new/data/yunwei/flaskProject/app.py", line 64, in decorated_function
+    return f(*args, **kwargs)
+  File "/new/data/yunwei/flaskProject/app.py", line 108, in GetHost
+    different_ips_dict = Get_Host.diff_list()
+  File "/new/data/yunwei/flaskProject/flaskrr/Get_Host.py", line 114, in diff_list
+    vm_info_list = [row[:2] for row in vm_info_list  if "VMware vCenter Server" not in vm["name"]]
+  File "/new/data/yunwei/flaskProject/flaskrr/Get_Host.py", line 114, in <listcomp>
+    vm_info_list = [row[:2] for row in vm_info_list  if "VMware vCenter Server" not in vm["name"]]
+NameError: name 'vm' is not defined

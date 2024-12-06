@@ -1,6 +1,6 @@
 import os
 import threading
-import time
+import time,logging
 import requests,jsonify
 import pandas as pd
 
@@ -8,7 +8,7 @@ from functools import wraps
 from datetime import datetime, timedelta
 from flask import Flask, render_template, url_for, session, request, jsonify, make_response, flash, redirect
 
-from flaskrr import Get_Host, Get_Rand_ps,Create_Zabbix_Host_1,Mod_domain
+from flaskrr import Get_Host, Get_Rand_ps,Create_Zabbix_Host_1,Mod_domain,Add_git_user
 
 class FlaskApp(Flask):
     def __init__(self, *args, **kwargs):
@@ -25,6 +25,20 @@ class FlaskApp(Flask):
         t1.start()
 
 app = FlaskApp(__name__)
+# 配置日志
+log_dir = 'log'
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+log_file = os.path.join(log_dir, 'flask_app.log')
+handler = logging.FileHandler(log_file)
+handler.setLevel(logging.DEBUG)  # 设置日志级别，可以设置为 DEBUG, INFO, WARNING 等
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+# 将 handler 添加到 Flask 的默认 logger
+app.logger.addHandler(handler)
+app.logger.setLevel(logging.DEBUG)
+
 # 自定义key
 app.secret_key = 'FpC4sK0IBVgbeXw8j8iehoEp4awsdPsv'
 # 模拟用户名和密码
@@ -130,7 +144,8 @@ def Create_domaindiy_text():
         file_name = request.form["filename"]
         nginx_config = request.form["nginx_config"]
         tocol = request.form["tocol"]
-        print("nginx_config:", nginx_config)
+        #print("nginx_config:", nginx_config)
+        nginx_config = nginx_config.replace('\r', '')
         try:
             response = Mod_domain.ssh_connect_and_execute_commands_text(file_name, nginx_config, tocol)
             if response: 
@@ -157,6 +172,28 @@ def get_data():
     html_table = data.to_html(classes='data', header=True, index=False)
     html_table = html_table.replace('\n', '').replace("['", '').replace(']', '') 
     return render_template('data_table.html', tables=[html_table])
-if __name__ == '__main__':
 
-    app.run(host='0.0.0.0', port=5001, debug=True)
+# git add new user
+@app.route('/create/adduser', methods=['GET', 'POST'])
+@login_required
+def add_user():
+    error_message = None
+    if request.method == 'POST':
+        name = request.form["name"]
+        username = request.form["username"]
+        email = request.form["email"]
+
+        try:
+            git = Add_git_user.GitLabUser()  # 实例化类
+            response = git.addUser(name, username, email)  # 调用方法
+            if response:
+                data = response.get_json()
+                error_message = data.get('error', '')
+        except Exception as e:
+            error_message = f"Check your token is expired? {str(e)}"
+    
+    # 确保这里的缩进正确
+    return render_template('add_user.html', error_message=error_message)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5001, debug=True,threaded=True)

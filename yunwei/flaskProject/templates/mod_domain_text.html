@@ -129,6 +129,7 @@ server {
 server {
     server_name idps.datagrand.com;
     listen 443 ssl;
+    # 选择需要的证书
     ssl_certificate /etc/nginx/ssl/datagrand.com.pem;
     ssl_certificate_key  /etc/nginx/ssl/datagrand.com.key;
     #ssl_certificate /etc/nginx/ssl/ssl_cn/datagrand.cn.pem;
@@ -156,8 +157,26 @@ server {
         proxy_set_header  X-Forwarded-Proto https;
         proxy_set_header  X-Forwarded-For $remote_addr;
         proxy_set_header  X-Forwarded-Host $remote_addr;
-        proxy_pass http://idps.datagrand.com/;
+        proxy_pass http://idps.datagrand.com/; # 修改这里
         proxy_redirect off;
+        # 解决跨域问题
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Requested-With,If-Modified-Since' always;
+        # 支持 CORS 预检请求
+        if ($request_method = OPTIONS ) {
+           add_header 'Access-Control-Allow-Origin' '*';
+           add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS';
+           add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Requested-With,If-Modified-Since';
+           add_header 'Access-Control-Max-Age' 1728000;
+           add_header 'Content-Type' 'text/plain charset=UTF-8';
+           add_header 'Content-Length' 0;
+           return 204;
+       } 
+       # ws协议
+       #proxy_set_header Upgrade $http_upgrade; 
+       #proxy_set_header Connection "Upgrade";
+
     }
 }
     </textarea>

@@ -1,0 +1,34 @@
+---
+- name: Setup Docker and System Configuration
+  hosts: all
+  become: true
+  tasks:
+
+    # Configure Docker daemon
+    - name: Configure Docker daemon using external file
+      copy:
+        dest: /etc/docker/daemon.json
+        content: "{{ lookup('file', 'configs/docker_daemon.json') }}"
+      notify:
+        - Restart Docker
+
+    # Configure sysctl settings
+    - name: Configure sysctl settings using external file
+      copy:
+        dest: /etc/sysctl.conf
+        content: "{{ lookup('file', 'configs/sysctl.conf') }}"
+      notify:
+        - Apply sysctl changes
+
+    - name: Apply sysctl changes
+      command: sysctl -p
+
+  handlers:
+    - name: Restart Docker
+      systemd:
+        name: docker
+        state: restarted
+
+    - name: Apply sysctl changes
+      command: sysctl -p
+

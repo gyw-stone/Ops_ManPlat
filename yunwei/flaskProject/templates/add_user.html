@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="jumbotron jumbotron-lg jumbotron-fluid mb-0 pb-3 bg-primary position-relative">
+    <div class="container">
+        <div class="panel panel-default">
+            <div class="panel-heading text-white">
+                <h3 class="text-left text-white">Git新用户创建</h2>
+            </div>
+              <!-- Table -->
+            <table class="table table-bordered">
+        <thead>
+    <form action="/create/adduser" method="POST">
+        <label class="text-white" for="name">请输入中文名:</label>
+        <input type="test" class="form-control" id="name" name="name"   placeholder="中文名字"  min="1" required>
+        <label class="text-white" for="username">请输入用户名:</label>
+        <input type="name" class="form-control" id="username" name="username" aria-describedby="nameHelp" placeholder="Username"  min="1" required>
+        <label class="text-white" for="email">请输入邮箱</label>
+        <input type="email" class="form-control" id="exampleInputEmail1" name="email" aria-describedby="emailHelp" placeholder="E-mail"  min="1" required>
+        <button type="submit">Submit</button>
+    </form>
+    {% if result %}
+        <h2>执行成功</h2>
+    {% endif %}
+
+      </table>
+
+</div>
+    <ul class="pagination">
+        {{ page_string }}
+    </ul>
+    </div>
+</div>
+{% endblock %}
