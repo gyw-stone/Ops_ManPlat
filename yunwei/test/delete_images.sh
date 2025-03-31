@@ -1,3 +1,7 @@
+“”“
+delete image by use api
+”“”
+
 #!/bin/bash
 
 harbor_url="https://dockerhub.datagrand.com"
