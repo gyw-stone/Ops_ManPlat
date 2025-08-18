@@ -107,7 +107,7 @@
         </div>
 
        <div class="form-group">
-            <label for="filename">成都公网IP: 61.139.65.42</label>
+            <label for="filename">公网IP: 114.114.114.114</label>
             <br>
             <a href="https://dns.console.aliyun.com/?spm=5176.ecscore_server.top-nav.7.1e404df5XrrZjW#/dns/domainList">阿里云DNS</a>
   
@@ -123,17 +123,17 @@
    <textarea id="nginxConfigDisplayHTTP" name="nginx_config" rows="25">
 server {
    listen 80;
-   server_name idps.datagrand.com;
+   server_name test.com;
    return 301 https://$server_name$request_uri;
 }
 server {
-    server_name idps.datagrand.com;
+    server_name test.com;
     listen 443 ssl;
     # 选择需要的证书
-    ssl_certificate /etc/nginx/ssl/datagrand.com.pem;
-    ssl_certificate_key  /etc/nginx/ssl/datagrand.com.key;
-    #ssl_certificate /etc/nginx/ssl/ssl_cn/datagrand.cn.pem;
-    #ssl_certificate_key /etc/nginx/ssl/ssl_cn/datagrand.cn.key;
+    ssl_certificate /etc/nginx/ssl/test.com.pem;
+    ssl_certificate_key  /etc/nginx/ssl/test.com.key;
+    #ssl_certificate /etc/nginx/ssl/ssl_cn/test.cn.pem;
+    #ssl_certificate_key /etc/nginx/ssl/ssl_cn/test.cn.key;
     # stop 3DES
     ssl_ecdh_curve secp384r1:prime256v1;
     # 加密算法
