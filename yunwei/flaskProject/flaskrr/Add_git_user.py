@@ -2,8 +2,8 @@ import requests
 
 class GitLabUser:
     def __init__(self,url = None,token = None):
-        self.url = 'https://git.datagrand.com/api/v4/'
-        self.token = 'GD1qRfWy4kaDZCwYgY3z'
+        self.url = 'https://git.com/api/v4/' # url
+        self.token = 'GD1qRfWy412kaDZCwYgY3zxq2x' # 用户token
         self.users_url = self.url + f'users'
         self.tow_factor = {
             'enabled': True
@@ -73,3 +73,4 @@ class GitLabUser:
 #    gitid = git.addUser('stonetest','stonetest','382331111@qq.com')
 #    git.addProject()
     
+
